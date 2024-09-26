@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet Search</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Embedded CSS for styling -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 0 auto 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        strong {
+            color: #3498db;
+        }
+
+        ul {
+            list-style-type: none;
+            margin-top: 10px;
+        }
+
+        ul li {
+            background-color: #fff;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #34495e;
+        }
+
+        .error-message {
+            text-align: center;
+            color: red;
+            margin-top: 20px;
+        }
+
+        .results-section {
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Animation for fading in the results */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tweet Search</h1>
+
+    <!-- Search Form -->
+    <form method="POST">
+        <label for="term">Search Term:</label>
+        <input type="text" id="term" name="term" placeholder="Enter search term..." required>
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Error Message -->
+    {% if error_message %}
+        <p class="error-message">{{ error_message }}</p>
+    {% endif %}
+
+    <!-- Search Results Section -->
+    {% if response_data %}
+        <div class="results-section">
+            <h2>Results for term: "{{ request.form.get('term') }}"</h2>
+
+            <p><strong>Total Tweets for {{ request.form.get('term') }}:</strong> {{ response_data.total_tweets }}</p>
+            <p><strong>User that posted most tweets containing "{{ request.form.get('term') }}" :</strong> {{ response_data.top_user }} ({{ response_data.top_user_tweet_count }} tweets)</p>
+            <p><strong>Unique Users:</strong> {{ response_data.unique_users }}</p>
+            <p><strong>Average Likes:</strong> {{ response_data.average_likes }}</p>
+            <p><strong>Place IDs:</strong> {{ response_data.place_ids | join(", ") }}</p>
+
+            <h3>Times of Day Tweets were posted:</h3>
+            <ul>
+                {% for hour, count in response_data.tweet_times_of_day_count.items() %}
+                    <li>{{ hour }}:00 - {{ count }} tweets</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Tweets by Day for "{{ request.form.get('term') }}":</h3>
+            <ul>
+                {% for date, count in response_data.tweets_by_day.items() %}
+                    <li>{{ date }}: {{ count }} tweets</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- Embedded JavaScript for animations -->
+    <script>
+        // Add a fade-in effect to search results
+        document.addEventListener("DOMContentLoaded", function() {
+            const resultsSection = document.querySelector('.results-section');
+            if (resultsSection) {
+                resultsSection.style.opacity = 0;
+                setTimeout(() => {
+                    resultsSection.style.opacity = 1;
+                }, 100); // Delayed fade-in effect
+            }
+        });
+
+        // Scroll to results on search
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            setTimeout(() => {
+                const resultsSection = document.querySelector('.results-section');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 500); // Delay scroll until the results are rendered
+        });
+    </script>
+</body>
+</html>
